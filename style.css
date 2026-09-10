@@ -52,6 +52,7 @@ body { background-color: var(--bg-color); background-image: var(--bg-gradient); 
 a { color: var(--text-main); text-decoration: underline; text-underline-offset: 4px; transition: var(--transition);}
 a:hover { color: var(--text-muted); }
 
+/* FIX SAFARI BUG GHOSTING */
 .bg-shape { position: fixed; border-radius: 50%; filter: blur(80px); -webkit-filter: blur(80px); z-index: -1; opacity: 0.5; transform: translateZ(0);}
 .shape-1 { width: 400px; height: 400px; background: rgba(142, 142, 147, 0.2); top: -100px; left: -100px; }
 .shape-2 { width: 500px; height: 500px; background: rgba(142, 142, 147, 0.15); bottom: -150px; right: -100px; }
@@ -76,7 +77,6 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
     -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
 }
 
-/* SIDEBAR Y MENÚ HAMBURGUESA */
 .sidebar { width: 280px; padding: 30px 20px; display: flex; flex-direction: column; z-index: 1000; border-right: 1px solid var(--glass-border); border-radius: 0 30px 30px 0; }
 .sidebar h2 { font-size: 1.3rem; margin-bottom: 35px; color: var(--text-main); display: flex; gap: 12px; align-items: center; padding-left: 10px;}
 .sidebar h2 i { color: var(--text-main); opacity: 0.8;}
@@ -209,10 +209,13 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .trophy-container { width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 25px auto; color: var(--text-main);}
 .divider { height: 1px; background: var(--glass-border); margin: 30px 0; }
 
-/* PANTALLA COMPLETA TUTOR */
+/* PANTALLA COMPLETA TUTOR (ESTILO GEMINI/CHATGPT CON FIX PARA SAFARI MÓVIL) */
 .tutor-fullscreen {
     position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-    width: 100vw !important; height: 100vh !important; max-width: none !important; z-index: 99999 !important;
+    width: 100vw !important; 
+    height: 100vh !important; 
+    height: 100dvh !important; /* DVH: Dynamic Viewport Height (Apple Safari Fix) */
+    max-width: none !important; z-index: 99999 !important;
     border-radius: 0 !important; margin: 0 !important; padding: 0 !important;
     background: var(--card-bg) !important; 
     backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-sizing: border-box !important;
@@ -222,10 +225,15 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 
 .tutor-fullscreen .tutor-header { width: 100%; max-width: 900px; padding: 20px 40px !important; border-bottom: none !important; background: transparent !important; margin: 0 auto;}
 .tutor-fullscreen .tutor-chat-history { width: 100%; max-width: 900px; flex: 1; padding: 20px 40px 120px 40px !important; margin: 0 auto;}
-.tutor-fullscreen .tutor-input-area { width: 100%; position: absolute; bottom: 0; left: 0; padding: 20px 40px 40px 40px !important; background: linear-gradient(transparent, var(--card-bg) 40%) !important; display: flex !important; justify-content: center !important; }
+.tutor-fullscreen .tutor-input-area { 
+    width: 100%; position: absolute; bottom: 0; left: 0; 
+    padding: 20px 40px 40px 40px !important; 
+    padding-bottom: max(40px, env(safe-area-inset-bottom)) !important; /* Safe Area Apple Fix */
+    background: linear-gradient(transparent, var(--card-bg) 40%) !important; display: flex !important; justify-content: center !important; 
+}
 .tutor-fullscreen .tutor-input-wrapper { width: 100%; max-width: 800px; box-shadow: var(--shadow-lg); background: var(--bg-color); }
 
-/* BURBUJAS DE CHAT */
+/* BURBUJAS DE CHAT ESTILO GEMINI */
 .msg-user { 
     align-self: flex-end; background: var(--inner-glass-bg); color: var(--text-main); 
     padding: 12px 18px; border-radius: 20px; border-bottom-right-radius: 4px; border: 1px solid var(--glass-border);
@@ -253,19 +261,18 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .section.active-section { display: block; }
 .fade-in { animation: fadeIn 0.4s ease-out forwards; will-change: opacity, transform; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
 #cases-content h3, #cases-content h4 { margin-top: 20px; margin-bottom: 10px; color: var(--text-main); }
 #cases-content p { margin-bottom: 15px; }
 #cases-content ul { margin-left: 20px; margin-bottom: 15px; }
 #cases-content li { margin-bottom: 5px; }
 
-/* --- RESPONSIVE MOBILE TWEAKS Y MENÚ HAMBURGUESA --- */
 @media (max-width: 900px) { 
     body { flex-direction: column; overflow: auto; } 
     
     .mobile-only-btn { display: flex !important; }
     
-    /* Overlay fondo negro oscuro al abrir menu */
     .sidebar-overlay { 
         display: block; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
         background: rgba(0,0,0,0.5); z-index: 999; opacity: 0; visibility: hidden; 
@@ -273,11 +280,10 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
     }
     .sidebar-overlay.open { opacity: 1; visibility: visible; }
     
-    /* El Menú lateral en móvil escondido a la izquierda */
     .sidebar { 
         position: fixed; top: 0; left: 0; width: 280px; height: 100vh; z-index: 1000;
         transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        border-radius: 0 20px 20px 0; background: var(--bg-color); /* Fondo sólido móvil para evitar ghosting extra */
+        border-radius: 0 20px 20px 0; background: var(--bg-color); 
     }
     .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg);}
     
@@ -286,5 +292,12 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
     .scroll-container { padding: 0 20px 40px 20px; overflow-y: visible;}
     .flashcard-front, .flashcard-back { padding: 30px 20px; }
     .fc-text { font-size: 1.15rem; }
-    .tutor-fullscreen .tutor-header, .tutor-fullscreen .tutor-chat-history, .tutor-fullscreen .tutor-input-area { padding: 20px !important; }
+    
+    /* FIX MOBILE PADDING SAFARI FULLSCREEN CHAT */
+    .tutor-fullscreen .tutor-header { padding: 20px !important; }
+    .tutor-fullscreen .tutor-chat-history { padding: 20px 20px 140px 20px !important; }
+    .tutor-fullscreen .tutor-input-area { 
+        padding: 15px 20px 50px 20px !important; 
+        padding-bottom: calc(50px + env(safe-area-inset-bottom)) !important;
+    }
 }

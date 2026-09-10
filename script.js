@@ -556,12 +556,22 @@ $('btn-fc-good').addEventListener('click', async () => {
     nextCard();
 });
 
+function triggerConfetti() {
+    var duration = 3 * 1000; var end = Date.now() + duration;
+    const style = getComputedStyle(document.body); const mainColor = style.getPropertyValue('--text-main').trim();
+    (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: [mainColor, '#30d158', '#8e8e93'] });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: [mainColor, '#30d158', '#8e8e93'] });
+        if (Date.now() < end) requestAnimationFrame(frame);
+    }());
+}
+
 function nextCard() {
     currentIndex++;
     if(currentIndex < currentSessionCards.length) { showCard(currentIndex); } 
     else {
         $('fc-workspace').style.display = 'none';
-        if (studyMode === 'due') { $('congrats-modal').style.display = 'flex'; } 
+        if (studyMode === 'due') { $('congrats-modal').style.display = 'flex'; triggerConfetti(); } 
         else { alert("Modo juego completado."); $('fc-setup').style.display = 'block'; }
         checkDueCards();
     }
