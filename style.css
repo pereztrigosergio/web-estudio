@@ -52,7 +52,6 @@ body { background-color: var(--bg-color); background-image: var(--bg-gradient); 
 a { color: var(--text-main); text-decoration: underline; text-underline-offset: 4px; transition: var(--transition);}
 a:hover { color: var(--text-muted); }
 
-/* FIX SAFARI BUG GHOSTING */
 .bg-shape { position: fixed; border-radius: 50%; filter: blur(80px); -webkit-filter: blur(80px); z-index: -1; opacity: 0.5; transform: translateZ(0);}
 .shape-1 { width: 400px; height: 400px; background: rgba(142, 142, 147, 0.2); top: -100px; left: -100px; }
 .shape-2 { width: 500px; height: 500px; background: rgba(142, 142, 147, 0.15); bottom: -150px; right: -100px; }
@@ -77,7 +76,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
     -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
 }
 
-.sidebar { width: 280px; padding: 30px 20px; display: flex; flex-direction: column; z-index: 10; border-right: 1px solid var(--glass-border); border-radius: 0 30px 30px 0; }
+/* SIDEBAR Y MENÚ HAMBURGUESA */
+.sidebar { width: 280px; padding: 30px 20px; display: flex; flex-direction: column; z-index: 1000; border-right: 1px solid var(--glass-border); border-radius: 0 30px 30px 0; }
 .sidebar h2 { font-size: 1.3rem; margin-bottom: 35px; color: var(--text-main); display: flex; gap: 12px; align-items: center; padding-left: 10px;}
 .sidebar h2 i { color: var(--text-main); opacity: 0.8;}
 .nav-group { margin-bottom: 10px; }
@@ -90,6 +90,9 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .nav-btn.active { background: var(--inner-glass-bg); color: var(--text-main); border-color: var(--glass-border); box-shadow: var(--shadow-sm); font-weight: 600; }
 .nav-btn.active i { opacity: 1; color: var(--text-main); }
 
+.mobile-only-btn { display: none !important; }
+.sidebar-overlay { display: none; }
+
 .main-content { flex: 1; display: flex; flex-direction: column; max-width: 1100px; margin: 0 auto; width: 100%; height: 100vh; }
 .header { display: flex; justify-content: space-between; align-items: center; padding: 40px 60px 20px 60px; flex-shrink: 0; }
 .header-controls { display: flex; gap: 15px; align-items: center; flex-wrap: wrap;}
@@ -101,7 +104,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .scroll-container::-webkit-scrollbar-thumb { background: rgba(142, 142, 147, 0.3); border-radius: 10px; }
 .scroll-container::-webkit-scrollbar-thumb:hover { background: rgba(142, 142, 147, 0.6); }
 
-/* --- POMODORO WIDGET REDISEÑADO --- */
+/* POMODORO */
 .pomo-container { display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 20px; border-radius: 30px; }
 .pomo-time { font-weight: 600; font-family: monospace; font-size: 1.15rem; width: 55px; text-align: center; color: var(--text-main); transition: color 0.3s;}
 .pomo-controls { display: flex; gap: 2px; border-left: 1px solid var(--glass-border); padding-left: 8px;}
@@ -134,7 +137,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .ghost-btn:hover { background: var(--inner-glass-bg); transform: scale(1.02); }
 
 .large-btn { padding: 16px 24px; font-size: 1.05rem; }
-.icon-btn { padding: 10px; border-radius: 50%; width: 40px; height: 40px; }
+.icon-btn { padding: 10px; border-radius: 50%; width: 40px; height: 40px; justify-content: center; }
 
 .card { padding: 30px; border-radius: var(--radius-md); transition: var(--smooth-spring);}
 .setup-card { max-width: 700px; margin: 0 auto; }
@@ -206,15 +209,15 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .trophy-container { width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 25px auto; color: var(--text-main);}
 .divider { height: 1px; background: var(--glass-border); margin: 30px 0; }
 
-/* --- PANTALLA COMPLETA TUTOR SOLUCIONADA (ESTILO GEMINI PURO) --- */
+/* PANTALLA COMPLETA TUTOR */
 .tutor-fullscreen {
     position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
     width: 100vw !important; height: 100vh !important; max-width: none !important; z-index: 99999 !important;
     border-radius: 0 !important; margin: 0 !important; padding: 0 !important;
-    background: var(--card-bg) !important; /* Fondo Blanco/Negro Sólido */
+    background: var(--card-bg) !important; 
     backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-sizing: border-box !important;
     display: flex !important; flex-direction: column !important; align-items: center !important;
-    border: none !important; transform: none !important; /* Resetea transforms del padre */
+    border: none !important; transform: none !important; 
 }
 
 .tutor-fullscreen .tutor-header { width: 100%; max-width: 900px; padding: 20px 40px !important; border-bottom: none !important; background: transparent !important; margin: 0 auto;}
@@ -222,7 +225,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .tutor-fullscreen .tutor-input-area { width: 100%; position: absolute; bottom: 0; left: 0; padding: 20px 40px 40px 40px !important; background: linear-gradient(transparent, var(--card-bg) 40%) !important; display: flex !important; justify-content: center !important; }
 .tutor-fullscreen .tutor-input-wrapper { width: 100%; max-width: 800px; box-shadow: var(--shadow-lg); background: var(--bg-color); }
 
-/* BURBUJAS DE CHAT ESTILO GEMINI */
+/* BURBUJAS DE CHAT */
 .msg-user { 
     align-self: flex-end; background: var(--inner-glass-bg); color: var(--text-main); 
     padding: 12px 18px; border-radius: 20px; border-bottom-right-radius: 4px; border: 1px solid var(--glass-border);
@@ -250,16 +253,34 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
 .section.active-section { display: block; }
 .fade-in { animation: fadeIn 0.4s ease-out forwards; will-change: opacity, transform; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
 #cases-content h3, #cases-content h4 { margin-top: 20px; margin-bottom: 10px; color: var(--text-main); }
 #cases-content p { margin-bottom: 15px; }
 #cases-content ul { margin-left: 20px; margin-bottom: 15px; }
 #cases-content li { margin-bottom: 5px; }
 
+/* --- RESPONSIVE MOBILE TWEAKS Y MENÚ HAMBURGUESA --- */
 @media (max-width: 900px) { 
     body { flex-direction: column; overflow: auto; } 
-    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--glass-border); padding: 15px 20px; border-radius: 0; } 
+    
+    .mobile-only-btn { display: flex !important; }
+    
+    /* Overlay fondo negro oscuro al abrir menu */
+    .sidebar-overlay { 
+        display: block; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+        background: rgba(0,0,0,0.5); z-index: 999; opacity: 0; visibility: hidden; 
+        transition: 0.3s ease; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    }
+    .sidebar-overlay.open { opacity: 1; visibility: visible; }
+    
+    /* El Menú lateral en móvil escondido a la izquierda */
+    .sidebar { 
+        position: fixed; top: 0; left: 0; width: 280px; height: 100vh; z-index: 1000;
+        transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border-radius: 0 20px 20px 0; background: var(--bg-color); /* Fondo sólido móvil para evitar ghosting extra */
+    }
+    .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg);}
+    
     .main-content { padding: 0; overflow-y: visible; height: auto;} 
     .header { padding: 20px; flex-wrap: wrap; gap: 15px;}
     .scroll-container { padding: 0 20px 40px 20px; overflow-y: visible;}

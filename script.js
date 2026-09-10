@@ -18,6 +18,22 @@ themeToggle.addEventListener('click', () => {
     themeToggle.querySelector('.text').innerText = isDark ? 'Modo Oscuro' : 'Modo Claro';
 });
 
+// --- MENÚ MÓVIL (HAMBURGUESA) ---
+const mobileMenuBtn = $('mobile-menu-btn');
+const sidebar = document.querySelector('.sidebar');
+const sidebarOverlay = $('sidebar-overlay');
+
+if(mobileMenuBtn && sidebarOverlay) {
+    mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.add('open');
+        sidebarOverlay.classList.add('open');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+    });
+}
+
 function resetWorkspaces() {
     if($('test-workspace')) $('test-workspace').style.display = 'none';
     if($('test-setup')) $('test-setup').style.display = 'block';
@@ -53,6 +69,12 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         const scrollContainer = document.querySelector('.scroll-container');
         if(scrollContainer) scrollContainer.scrollTop = 0;
         
+        // Cerrar menú móvil si se pulsó una opción
+        if (window.innerWidth <= 900) {
+            sidebar.classList.remove('open');
+            if(sidebarOverlay) sidebarOverlay.classList.remove('open');
+        }
+
         resetWorkspaces(); 
         if(targetId === 'flashcards') checkDueCards();
         if(['tests', 'flashcards', 'cases', 'tutor'].includes(targetId)) renderAllDocSelectors();
@@ -141,24 +163,46 @@ async function getCards() { return new Promise(res => { if(!db) return res([]); 
 async function saveCard(card) { return new Promise(res => { const req = db.transaction(['cards'],'readwrite').objectStore('cards').put(card); req.onsuccess = () => res(); }); }
 
 $('pdf-upload').addEventListener('change', async (e) => {
-    const file = e.target.files[0]; if(!file) return;
-    $('upload-status').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+    const files = e.target.files; 
+    if(!files || files.length === 0) return;
+    
+    $('upload-status').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando ${files.length} documento(s)...`;
+    $('upload-status').style.color = 'var(--text-main)';
+    
     setTimeout(async () => {
         try {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            let text = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                text += content.items.map(it => it.str).join(' ') + '\n';
+            let guardados = 0;
+            for(let f = 0; f < files.length; f++) {
+                const file = files[f];
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                
+                const pagePromises = [];
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    pagePromises.push(
+                        pdf.getPage(i).then(page => page.getTextContent()).then(content => content.items.map(it => it.str).join(' '))
+                    );
+                }
+                const pagesText = await Promise.all(pagePromises);
+                const text = pagesText.join('\n');
+                
+                await new Promise(resolve => {
+                    const req = db.transaction(['docs'], 'readwrite').objectStore('docs')
+                        .add({ name: file.name, content: text.replace(/wuolah/gi, '').trim(), pages: pdf.numPages });
+                    req.onsuccess = () => { guardados++; resolve(); };
+                });
             }
-            db.transaction(['docs'], 'readwrite').objectStore('docs').add({ name: file.name, content: text.replace(/wuolah/gi, '').trim(), pages: pdf.numPages }).oncomplete = () => { 
-                $('upload-status').innerHTML = '<i class="fa-solid fa-check"></i> ¡Guardado!'; 
-                setTimeout(() => { $('upload-status').innerHTML = ''; }, 3000); 
-                renderDocs(); renderAllDocSelectors(); 
-            };
-        } catch(err) { $('upload-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Error.'; }
+            $('upload-status').innerHTML = `<i class="fa-solid fa-check"></i> ¡${guardados} documento(s) guardado(s)!`; 
+            $('upload-status').style.color = 'var(--success-color)';
+            setTimeout(() => { $('upload-status').innerHTML = ''; }, 3000); 
+            renderDocs(); renderAllDocSelectors(); 
+            
+        } catch(err) { 
+            console.error(err);
+            $('upload-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Error al procesar PDF.'; 
+            $('upload-status').style.color = 'var(--danger-color)'; 
+        }
+        e.target.value = '';
     }, 100);
 });
 
@@ -406,7 +450,6 @@ $('btn-send-tutor').addEventListener('click', async () => {
 });
 $('tutor-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') $('btn-send-tutor').click(); });
 
-// SOLUCIÓN DEFINITIVA AL BUG DE PANTALLA COMPLETA
 $('btn-tutor-fullscreen').addEventListener('click', () => {
     const container = $('tutor-chat-container');
     const icon = $('btn-tutor-fullscreen').querySelector('i');
@@ -417,19 +460,13 @@ $('btn-tutor-fullscreen').addEventListener('click', () => {
     if(container.classList.contains('tutor-fullscreen')) {
         icon.classList.remove('fa-expand'); 
         icon.classList.add('fa-compress');
-        
-        // MAGIA: Sacamos el contenedor del flujo del DOM actual 
-        // para que las animaciones de la clase .fade-in no atrapen la posición 'fixed'
         document.body.appendChild(container);
     } else {
         icon.classList.remove('fa-compress'); 
         icon.classList.add('fa-expand');
-        
-        // Lo devolvemos a su sitio original en el grid
         tutorSectionGrid.appendChild(container);
     }
     
-    // Forzamos el scroll abajo al cambiar de vista
     setTimeout(() => {
         const chatHist = $('chat-history');
         chatHist.scrollTop = chatHist.scrollHeight;
@@ -519,22 +556,12 @@ $('btn-fc-good').addEventListener('click', async () => {
     nextCard();
 });
 
-function triggerConfetti() {
-    var duration = 3 * 1000; var end = Date.now() + duration;
-    const style = getComputedStyle(document.body); const mainColor = style.getPropertyValue('--text-main').trim();
-    (function frame() {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: [mainColor, '#30d158', '#8e8e93'] });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: [mainColor, '#30d158', '#8e8e93'] });
-        if (Date.now() < end) requestAnimationFrame(frame);
-    }());
-}
-
 function nextCard() {
     currentIndex++;
     if(currentIndex < currentSessionCards.length) { showCard(currentIndex); } 
     else {
         $('fc-workspace').style.display = 'none';
-        if (studyMode === 'due') { $('congrats-modal').style.display = 'flex'; triggerConfetti(); } 
+        if (studyMode === 'due') { $('congrats-modal').style.display = 'flex'; } 
         else { alert("Modo juego completado."); $('fc-setup').style.display = 'block'; }
         checkDueCards();
     }

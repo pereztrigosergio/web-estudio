@@ -18,6 +18,9 @@
     <div class="bg-shape shape-1"></div>
     <div class="bg-shape shape-2"></div>
 
+    <!-- OVERLAY PARA MÓVIL -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
     <div class="sidebar glass-effect">
         <h2><i class="fa-solid fa-dumbbell"></i> Metodología</h2>
         
@@ -60,10 +63,15 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 id="page-title">Inicio</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- BOTÓN HAMBURGUESA (SÓLO MÓVIL) -->
+                <button id="mobile-menu-btn" class="action-btn icon-btn glass-btn mobile-only-btn" style="display: none; width: 45px; height: 45px;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 id="page-title">Inicio</h1>
+            </div>
             
             <div class="header-controls">
-                <!-- Temporizador Pomodoro Rediseñado -->
                 <div id="pomodoro-widget" class="pomo-container glass-effect">
                     <i class="fa-solid fa-clock pomo-icon" id="pomo-mode-icon" style="color:var(--text-muted);"></i> 
                     <span id="pomodoro-time" class="pomo-time">25:00</span>
@@ -113,11 +121,11 @@
                         <i class="fa-solid fa-cloud-arrow-up fa-2x"></i>
                     </div>
                     <h3>Sube tus apuntes en PDF</h3>
-                    <p class="text-sm text-muted" style="margin-top:5px; margin-bottom:20px;">Arrastra tus archivos o pulsa el botón</p>
+                    <p class="text-sm text-muted" style="margin-top:5px; margin-bottom:20px;">Arrastra o selecciona uno o varios archivos</p>
                     
-                    <input type="file" id="pdf-upload" accept=".pdf" style="display: none;">
+                    <input type="file" id="pdf-upload" accept=".pdf" multiple style="display: none;">
                     <button class="action-btn glass-btn" onclick="document.getElementById('pdf-upload').click()">
-                        <i class="fa-solid fa-plus"></i> Seleccionar PDF
+                        <i class="fa-solid fa-plus"></i> Seleccionar PDF(s)
                     </button>
                     <div id="upload-status" class="status-msg" style="margin-top: 15px; font-weight:500;"></div>
                 </div>
@@ -362,7 +370,7 @@
                         
                         <div class="tutor-input-area" style="position:absolute; bottom:0; left:0; width:100%; padding:15px 25px 20px; background: linear-gradient(transparent, var(--bg-color) 40%); z-index:2;">
                             <div class="tutor-input-wrapper" style="max-width:800px; margin:0 auto; display:flex; gap:10px; background:var(--bg-color); border:1px solid var(--glass-border); border-radius:30px; padding:6px 6px 6px 20px; align-items:center; box-shadow:var(--shadow-md);">
-                                <input type="text" id="tutor-input" placeholder="Escribe tu duda al tutor..." style="flex:1; border:none; background:transparent; outline:none; color:var(--text-main); font-size:1.05rem; font-family:inherit;">
+                                <input type="text" id="tutor-input" placeholder="Escribe tu duda al tutor..." style="flex:1; border:none; background:transparent; outline:none; color:var(--text-main); font-size:0.95rem; font-family:inherit;">
                                 <button class="action-btn primary-btn icon-btn" id="btn-send-tutor" style="width:38px; height:38px; flex-shrink:0; border-radius:50%;"><i class="fa-solid fa-arrow-up"></i></button>
                             </div>
                         </div>
@@ -370,7 +378,7 @@
                 </div>
             </div>
 
-            <!-- TUTORIAL MEJORADO -->
+            <!-- TUTORIAL -->
             <div id="tutorial" class="section fade-in">
                 <div class="card glass-effect setup-card" style="max-width: 800px; padding: 40px;">
                     <div class="icon-circle" style="background: rgba(142, 142, 147, 0.15); color: var(--text-main);">
@@ -399,7 +407,7 @@
                             <i class="fa-solid fa-file-pdf"></i> Paso 2: Mis Apuntes
                         </h3>
                         <ul style="padding-left: 20px; font-size: 0.95rem; line-height: 1.6; color: var(--text-muted);">
-                            <li><strong>Subir:</strong> Sube tus PDFs de Metodología. La app extrae el texto y lo guarda en la memoria de tu navegador.</li>
+                            <li><strong>Subir:</strong> Sube tus PDFs de Metodología. Puedes subir varios de golpe. La app extrae el texto y lo guarda en la memoria de tu navegador.</li>
                             <li><strong>Renombrar:</strong> Para organizarte mejor, haz <strong>doble clic</strong> encima del nombre de un PDF en la lista para cambiarle el nombre a algo más claro (Ej: "Tema 1").</li>
                         </ul>
                     </div>
