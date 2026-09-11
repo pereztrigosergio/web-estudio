@@ -111,11 +111,11 @@ function switchPomoPhase() {
 $('btn-pomo-play').addEventListener('click', () => {
     if(pomoIsRunning) {
         clearInterval(pomoInterval);
-        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
+        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem; margin-left: 2px;"></i>';
         pomoIsRunning = false;
     } else {
         pomoIsRunning = true;
-        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-pause" style="font-size:0.8rem;"></i>';
+        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-pause" style="font-size:0.85rem;"></i>';
         pomoInterval = setInterval(() => {
             if(pomoTime > 0) {
                 pomoTime--;
@@ -123,7 +123,7 @@ $('btn-pomo-play').addEventListener('click', () => {
             } else {
                 clearInterval(pomoInterval);
                 pomoIsRunning = false;
-                $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
+                $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem; margin-left: 2px;"></i>';
                 switchPomoPhase(); 
             }
         }, 1000);
@@ -133,7 +133,7 @@ $('btn-pomo-play').addEventListener('click', () => {
 $('btn-pomo-skip').addEventListener('click', () => {
     clearInterval(pomoInterval);
     pomoIsRunning = false;
-    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
+    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem; margin-left: 2px;"></i>';
     switchPomoPhase(); 
 });
 
@@ -142,7 +142,7 @@ $('btn-pomo-reset').addEventListener('click', () => {
     pomoIsRunning = false;
     pomoTime = pomoMode === 'work' ? 25 * 60 : 5 * 60;
     updatePomoDisplay();
-    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
+    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem; margin-left: 2px;"></i>';
 });
 
 
@@ -271,7 +271,8 @@ async function askGemini(prompt) {
     const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) { alert('Añade tu Clave API en la sección de Ajustes primero.'); return null; }
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // Se usa gemini-1.5-flash-8b-latest para máxima velocidad y evitar errores de versión
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b-latest:generateContent?key=${apiKey}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2 } })
         });
@@ -419,7 +420,7 @@ $('btn-start-case').addEventListener('click', async () => {
 });
 $('btn-exit-cases').addEventListener('click', () => { $('cases-workspace').style.display = 'none'; $('cases-setup').style.display = 'block'; });
 
-// --- TUTOR IA (ESTILO GEMINI - CONOCIMIENTO GENERAL OPCIONAL) ---
+// --- TUTOR IA ---
 $('btn-send-tutor').addEventListener('click', async () => {
     const input = $('tutor-input'); const msg = input.value.trim(); if(!msg) return;
     const context = await getContextText('tutor-doc-selector');
