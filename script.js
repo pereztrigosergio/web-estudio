@@ -271,7 +271,7 @@ async function askGemini(prompt) {
     const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) { alert('Añade tu Clave API en la sección de Ajustes primero.'); return null; }
     try {
-        // Se usa gemini-1.5-flash-8b-latest para máxima velocidad y evitar errores de versión
+        // Se usa gemini-1.5-flash-8b-latest para máxima velocidad
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b-latest:generateContent?key=${apiKey}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2 } })
@@ -420,7 +420,7 @@ $('btn-start-case').addEventListener('click', async () => {
 });
 $('btn-exit-cases').addEventListener('click', () => { $('cases-workspace').style.display = 'none'; $('cases-setup').style.display = 'block'; });
 
-// --- TUTOR IA ---
+// --- TUTOR IA (ESTILO GEMINI) ---
 $('btn-send-tutor').addEventListener('click', async () => {
     const input = $('tutor-input'); const msg = input.value.trim(); if(!msg) return;
     const context = await getContextText('tutor-doc-selector');
