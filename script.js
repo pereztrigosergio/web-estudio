@@ -18,7 +18,6 @@ themeToggle.addEventListener('click', () => {
     themeToggle.querySelector('.text').innerText = isDark ? 'Modo Oscuro' : 'Modo Claro';
 });
 
-// --- MENÚ MÓVIL (HAMBURGUESA) ---
 const mobileMenuBtn = $('mobile-menu-btn');
 const sidebar = document.querySelector('.sidebar');
 const sidebarOverlay = $('sidebar-overlay');
@@ -69,7 +68,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         const scrollContainer = document.querySelector('.scroll-container');
         if(scrollContainer) scrollContainer.scrollTop = 0;
         
-        // Cerrar menú móvil si se pulsó una opción
         if (window.innerWidth <= 900) {
             sidebar.classList.remove('open');
             if(sidebarOverlay) sidebarOverlay.classList.remove('open');
@@ -81,7 +79,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     });
 });
 
-// --- POMODORO TIMER REDISEÑADO ---
+// --- POMODORO TIMER ---
 let pomoTime = 25 * 60;
 let pomoInterval = null;
 let pomoIsRunning = false;
@@ -113,11 +111,11 @@ function switchPomoPhase() {
 $('btn-pomo-play').addEventListener('click', () => {
     if(pomoIsRunning) {
         clearInterval(pomoInterval);
-        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem;"></i>';
+        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
         pomoIsRunning = false;
     } else {
         pomoIsRunning = true;
-        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-pause" style="font-size:0.85rem;"></i>';
+        $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-pause" style="font-size:0.8rem;"></i>';
         pomoInterval = setInterval(() => {
             if(pomoTime > 0) {
                 pomoTime--;
@@ -125,7 +123,7 @@ $('btn-pomo-play').addEventListener('click', () => {
             } else {
                 clearInterval(pomoInterval);
                 pomoIsRunning = false;
-                $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem;"></i>';
+                $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
                 switchPomoPhase(); 
             }
         }, 1000);
@@ -135,7 +133,7 @@ $('btn-pomo-play').addEventListener('click', () => {
 $('btn-pomo-skip').addEventListener('click', () => {
     clearInterval(pomoInterval);
     pomoIsRunning = false;
-    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem;"></i>';
+    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
     switchPomoPhase(); 
 });
 
@@ -144,7 +142,7 @@ $('btn-pomo-reset').addEventListener('click', () => {
     pomoIsRunning = false;
     pomoTime = pomoMode === 'work' ? 25 * 60 : 5 * 60;
     updatePomoDisplay();
-    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.85rem;"></i>';
+    $('btn-pomo-play').innerHTML = '<i class="fa-solid fa-play" style="font-size:0.8rem; margin-left: 2px;"></i>';
 });
 
 
@@ -421,11 +419,10 @@ $('btn-start-case').addEventListener('click', async () => {
 });
 $('btn-exit-cases').addEventListener('click', () => { $('cases-workspace').style.display = 'none'; $('cases-setup').style.display = 'block'; });
 
-// --- TUTOR IA (ESTILO GEMINI) ---
+// --- TUTOR IA (ESTILO GEMINI - CONOCIMIENTO GENERAL OPCIONAL) ---
 $('btn-send-tutor').addEventListener('click', async () => {
     const input = $('tutor-input'); const msg = input.value.trim(); if(!msg) return;
     const context = await getContextText('tutor-doc-selector');
-    if(!context) return alert('Selecciona apuntes para que el tutor los lea.');
     
     const btn = $('btn-send-tutor'); if(btn.disabled) return; btn.disabled = true;
     
@@ -441,7 +438,12 @@ $('btn-send-tutor').addEventListener('click', async () => {
         </div>`;
     chatHist.scrollTop = chatHist.scrollHeight;
     
-    const prompt = `Eres un tutor particular experto en Metodología del Entrenamiento. Tu alumno te hace una pregunta. Responde de forma didáctica, clara y cercana, basándote EXCLUSIVAMENTE en estos apuntes:\n${context}\n\nPregunta del alumno: "${msg}"\n\nResponde usando Markdown. Usa listas y negritas para facilitar la lectura. Si la respuesta no está en los apuntes, dile que no lo sabe con seguridad basado en ese material.`;
+    let prompt = "";
+    if (context) {
+        prompt = `Eres un tutor universitario experto en Metodología del Entrenamiento. Tu alumno te pregunta. Responde de forma didáctica y cercana, basándote EXCLUSIVAMENTE en estos apuntes:\n${context}\n\nPregunta: "${msg}"\n\nUsa Markdown. Si la respuesta no está en los apuntes, indícalo.`;
+    } else {
+        prompt = `Eres un profesor universitario de élite y experto mundial en Metodología del Entrenamiento y Ciencias del Deporte. Un alumno te hace la siguiente consulta:\n\n"${msg}"\n\nResponde de forma rigurosa, clara, didáctica y estructurada. Usa Markdown (listas, negritas) para facilitar la lectura.`;
+    }
     
     const res = await askGemini(prompt); btn.disabled = false;
     const typingEl = $(typingId).querySelector('.ai-content');
