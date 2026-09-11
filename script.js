@@ -250,7 +250,7 @@ async function renderAllDocSelectors() {
 }
 
 
-// --- 🧠 CONEXIÓN API GEMINI 🧠 ---
+// --- 🧠 CONEXIÓN API GEMINI V32 (ENRUTAMIENTO DINÁMICO) 🧠 ---
 function setBtnLoading(btn, text) {
     if(btn.disabled) return false; 
     btn.disabled = true;
@@ -267,19 +267,38 @@ function resetBtnLoading(btn) {
     btn.style.pointerEvents = 'auto';
 }
 
-async function askGemini(prompt) {
+// Función Enrutadora: Elige el motor según la necesidad de la tarea
+async function askGemini(prompt, modelType = 'flash') {
     const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) { alert('Añade tu Clave API en la sección de Ajustes primero.'); return null; }
+    
+    // Motor por defecto (Rápido)
+    let modelName = 'gemini-1.5-flash';
+    
+    // Si la tarea requiere razonamiento profundo (Tutor o Casos), usamos Pro
+    if (modelType === 'pro') {
+        modelName = 'gemini-1.5-pro';
+    }
+
     try {
-        // Se usa gemini-1.5-flash-8b-latest para máxima velocidad
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b-latest:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2 } })
         });
         const data = await response.json();
-        if(data.error) { alert('Error API: ' + data.error.message); return null; }
+        
+        // Manejo de errores de API
+        if(data.error) { 
+            alert('Error API: ' + data.error.message); 
+            return null; 
+        }
+        
         return data.candidates[0].content.parts[0].text;
-    } catch (error) { console.error(error); alert('Error al conectar con la IA.'); return null; }
+    } catch (error) { 
+        console.error(error); 
+        alert('Error al conectar con la IA. Revisa tu conexión.'); 
+        return null; 
+    }
 }
 
 async function getContextText(selectorId) {
@@ -302,7 +321,7 @@ function cleanJSON(str) {
     } catch (e) { throw new Error("El formato devuelto por la IA no fue válido."); }
 }
 
-// --- GENERADOR DE TESTS ---
+// --- GENERADOR DE TESTS (Usa Flash por velocidad) ---
 let currentTest = []; let currentTestIndex = 0; let correctAnswers = 0; let wrongAnswers = 0;
 
 $('btn-start-test').addEventListener('click', async () => { 
@@ -315,7 +334,7 @@ $('btn-start-test').addEventListener('click', async () => {
     const diff = $('test-difficulty').value;
     const prompt = `Actúa como profesor universitario de Ciencias del Deporte. Basado estrictamente en este temario:\n${context}\n\nCrea un examen tipo test de ${numQ} preguntas. Nivel de dificultad: ${diff}. Devuelve ÚNICAMENTE un array JSON válido, sin formato markdown. Formato EXACTO requerido: [{"q": "Pregunta", "options": ["A) opc", "B) opc", "C) opc", "D) opc"], "ans": 0, "exp": "Explicación breve de por qué es la correcta"}]`;
     
-    const res = await askGemini(prompt);
+    const res = await askGemini(prompt, 'flash');
     resetBtnLoading(btn);
     
     if(res) {
@@ -391,13 +410,13 @@ $('btn-next-test-q').addEventListener('click', () => {
 });
 $('btn-exit-test').addEventListener('click', () => { $('test-workspace').style.display = 'none'; $('test-setup').style.display = 'block'; });
 
-// --- FLASHCARDS IA ---
+// --- FLASHCARDS IA (Usa Flash por velocidad) ---
 $('btn-generate-fc').addEventListener('click', async () => {
     const context = await getContextText('flashcards-doc-selector');
     if(!context) return alert('Selecciona al menos un documento.');
     const btn = $('btn-generate-fc'); if(!setBtnLoading(btn, 'Creando tarjetas...')) return;
     const prompt = `Basado en estos apuntes:\n${context}\n\nExtrae 5 conceptos clave, definiciones o fórmulas importantes y crea tarjetas de memoria (flashcards). Devuelve ÚNICAMENTE un array JSON válido. Formato EXACTO: [{"q": "Concepto o pregunta muy corta", "a": "Definición directa y concisa"}]`;
-    const res = await askGemini(prompt); resetBtnLoading(btn);
+    const res = await askGemini(prompt, 'flash'); resetBtnLoading(btn);
     if(res) {
         try {
             const cards = cleanJSON(res);
@@ -409,18 +428,18 @@ $('btn-generate-fc').addEventListener('click', async () => {
     }
 });
 
-// --- CASOS IA ---
+// --- CASOS IA (Usa Pro para inteligencia) ---
 $('btn-start-case').addEventListener('click', async () => {
     const context = await getContextText('cases-doc-selector');
     if(!context) return alert('Selecciona temario base.');
     const btn = $('btn-start-case'); if(!setBtnLoading(btn, 'Diseñando caso...')) return;
     const prompt = `Actúa como profesor evaluador de Ciencias del Deporte. Usando esta teoría:\n${context}\n\nInventa un caso práctico desafiante para el alumno. Describe el sujeto ficticio, su objetivo y su contexto deportivo. Luego, plantea 3 cuestiones o problemas que el alumno deba resolver aplicando la teoría del PDF. Utiliza formato Markdown limpio (usando ## para títulos y viñetas). NO resuelvas el caso, solo plantéalo.`;
-    const res = await askGemini(prompt); resetBtnLoading(btn);
+    const res = await askGemini(prompt, 'pro'); resetBtnLoading(btn);
     if(res) { $('cases-setup').style.display = 'none'; $('cases-workspace').style.display = 'block'; $('cases-content').innerHTML = marked.parse(res); }
 });
 $('btn-exit-cases').addEventListener('click', () => { $('cases-workspace').style.display = 'none'; $('cases-setup').style.display = 'block'; });
 
-// --- TUTOR IA (ESTILO GEMINI) ---
+// --- TUTOR IA (ESTILO GEMINI - Usa Pro para inteligencia) ---
 $('btn-send-tutor').addEventListener('click', async () => {
     const input = $('tutor-input'); const msg = input.value.trim(); if(!msg) return;
     const context = await getContextText('tutor-doc-selector');
@@ -446,7 +465,7 @@ $('btn-send-tutor').addEventListener('click', async () => {
         prompt = `Eres un profesor universitario de élite y experto mundial en Metodología del Entrenamiento y Ciencias del Deporte. Un alumno te hace la siguiente consulta:\n\n"${msg}"\n\nResponde de forma rigurosa, clara, didáctica y estructurada. Usa Markdown (listas, negritas) para facilitar la lectura.`;
     }
     
-    const res = await askGemini(prompt); btn.disabled = false;
+    const res = await askGemini(prompt, 'pro'); btn.disabled = false;
     const typingEl = $(typingId).querySelector('.ai-content');
     if(res) { typingEl.innerHTML = marked.parse(res); } else { typingEl.innerHTML = "<p><em>Error de conexión.</em></p>"; }
     chatHist.scrollTop = chatHist.scrollHeight;
